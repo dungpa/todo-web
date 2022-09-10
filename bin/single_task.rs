@@ -1,18 +1,18 @@
 use rocket::http::Status;
+use rocket::response::status;
 use rocket_contrib::json::Json;
 
 use todo_web::db::models::*;
 use todo_web::db::*;
 
 #[get("/tasks/<id>")]
-pub fn get(id: i32) -> Json<Task> {
+pub fn get(id: i32) -> Result<Json<Task>, status::NotFound<String>> {
     let conn = establish_connection();
     for task in filter_tasks(&conn, id) {
-        // TODO: return a Result value instead.
-        return Json(task); 
+        return Ok(Json(task)); 
     }
     
-    panic!("Error getting task {}", id)
+    Err(status::NotFound(format!("Error getting task {}.", id)))
 }
 
 #[post("/tasks/<id>")]
