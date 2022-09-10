@@ -25,6 +25,12 @@ pub fn query_tasks(connection: &SqliteConnection) -> Vec<models::Task> {
         .expect("Error loading tasks")
 }
 
+pub fn filter_tasks(connection: &SqliteConnection, task_id: i32) -> Vec<models::Task> {
+    schema::task::table.filter(id.eq(task_id))
+        .load::<models::Task>(connection)
+        .expect("Error filtering tasks")
+}
+
 pub fn update_task(connection: &SqliteConnection, task_id: i32, task_completed:bool) {
     diesel::update(schema::task::table.filter(id.eq(task_id)))
         .set(completed.eq(task_completed))
