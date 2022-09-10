@@ -5,10 +5,6 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[[bin]]
-name = "todo_web"
-path = "bin/web_server.rs"
-
 [dependencies]
 chrono = { version = "0.4.11", features = ["serde"] }
 diesel = { version = "1.0.0", features = ["sqlite", "chrono"] }

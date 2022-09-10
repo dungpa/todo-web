@@ -3,9 +3,6 @@
 #[macro_use]
 extern crate rocket;
 
-#[macro_use]
-extern crate serde;
-
 use todo_web::rest::*;
 
 fn main() {
