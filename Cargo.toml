@@ -6,9 +6,19 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]
-name = "cli"
+name = "todo_cli"
 path = "bin/cli.rs"
+
+[[bin]]
+name = "todo_web"
+path = "bin/web.rs"
 
 [dependencies]
 diesel = { version = "1.0.0", features = ["sqlite"] }
 rocket = "0.4.2"
+serde = { version = "1.0", features = ["derive"] }
+
+[dependencies.rocket_contrib]
+version = "0.4.2"
+default-features = false
+features = ["json"]
