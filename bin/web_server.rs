@@ -46,8 +46,21 @@ fn tasks_delete() -> Status {
     Status::Ok
 }
 
+#[get("/tasks/<id>")]
+fn task_get(id: i32) -> Json<Task> {
+    let conn = establish_connection();
+    // TODO: build a dedicated query for the given id.
+    for task in query_tasks(&conn) {
+        if task.id == id {
+            return Json(task);
+        }
+    }
+
+    panic!("Task {} not found", id);
+}
+
 fn main() {
     rocket::ignite()
-        .mount("/", routes![tasks_get, tasks_post, tasks_delete])
+        .mount("/", routes![tasks_get, tasks_post, tasks_delete, task_get])
         .launch();
 }
