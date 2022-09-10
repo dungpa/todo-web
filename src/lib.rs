@@ -1,3 +1,8 @@
+#![feature(proc_macro_hygiene, decl_macro)]
+
+#[macro_use]
+extern crate rocket;
+
 #[macro_use]
 extern crate diesel;
 
@@ -5,3 +10,4 @@ extern crate diesel;
 extern crate serde;
 
 pub mod db;
+pub mod rest;

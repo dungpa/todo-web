@@ -6,9 +6,10 @@ extern crate rocket;
 #[macro_use]
 extern crate serde;
 
+use todo_web::rest::*;
+
 pub mod all_tasks;
 pub mod single_task;
-pub mod stats;
 
 fn main() {
     rocket::ignite()
