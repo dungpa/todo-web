@@ -8,8 +8,6 @@ extern crate serde;
 
 use todo_web::rest::*;
 
-pub mod all_tasks;
-
 fn main() {
     rocket::ignite()
         .mount("/", routes![all_tasks::list, all_tasks::add, all_tasks::reset, 
