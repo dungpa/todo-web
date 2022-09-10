@@ -11,7 +11,7 @@ pub fn establish_connection() -> SqliteConnection {
 }
 
 pub fn create_task(connection: &SqliteConnection, description: &str) {
-    let task = models::NewTask { title: description, created_at: chrono::Local::now().naive_local(), completed: false };
+    let task = models::NewTask { title: description, created_at: chrono::Utc::now().naive_utc(), completed: false };
 
     diesel::insert_into(schema::task::table)
         .values(&task)
