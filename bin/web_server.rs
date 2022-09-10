@@ -4,9 +4,6 @@
 extern crate rocket;
 
 #[macro_use]
-extern crate rocket_contrib;
-
-#[macro_use]
 extern crate serde;
 
 use rocket::http::Status;
@@ -55,7 +52,7 @@ fn task_get(id: i32) -> Json<Task> {
             return Json(task);
         }
     }
-
+    // TODO: return a Result value instead.
     panic!("Task {} not found", id);
 }
 
