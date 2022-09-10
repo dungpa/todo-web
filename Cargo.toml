@@ -11,7 +11,7 @@ path = "bin/cli.rs"
 
 [[bin]]
 name = "todo_web"
-path = "bin/web.rs"
+path = "bin/web_server.rs"
 
 [dependencies]
 diesel = { version = "1.0.0", features = ["sqlite"] }
