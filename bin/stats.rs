@@ -9,7 +9,7 @@ pub struct StatsResponse {
 }
 
 #[get("/stats")]
-pub fn get() -> Json<StatsResponse> {
+pub fn count() -> Json<StatsResponse> {
     let conn = establish_connection();
     let tasks = query_tasks(&conn);
 

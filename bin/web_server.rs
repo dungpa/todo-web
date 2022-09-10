@@ -12,9 +12,9 @@ pub mod stats;
 
 fn main() {
     rocket::ignite()
-        .mount("/", routes![all_tasks::get, all_tasks::post, all_tasks::delete, 
-                            single_task::get, single_task::post, single_task::delete,
-                            stats::get,
+        .mount("/", routes![all_tasks::list, all_tasks::add, all_tasks::reset, 
+                            single_task::show, single_task::complete, single_task::remove,
+                            stats::count,
                            ])
         .launch();
 }

@@ -10,7 +10,7 @@ pub struct TaskListResponse {
 }
 
 #[get("/tasks")]
-pub fn get() -> Json<TaskListResponse> {
+pub fn list() -> Json<TaskListResponse> {
     let mut response = TaskListResponse { data: vec![], };
 
     let conn = establish_connection();
@@ -22,14 +22,14 @@ pub fn get() -> Json<TaskListResponse> {
 }
 
 #[post("/tasks", data = "<title>")]
-pub fn post(title: String) -> Status {
+pub fn add(title: String) -> Status {
     let conn = establish_connection();
     create_task(&conn, &title[..]); 
     Status::Ok
 }
 
 #[delete("/tasks")]
-pub fn delete() -> Status {
+pub fn reset() -> Status {
     let conn = establish_connection();
     delete_tasks(&conn); 
     Status::Ok
