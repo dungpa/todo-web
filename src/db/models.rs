@@ -4,6 +4,7 @@ use super::schema::task;
 #[table_name = "task"]
 pub struct NewTask<'a> {
     pub title: &'a str,
+    pub created_at: chrono::NaiveDateTime,
     pub completed: bool,
 }
 
@@ -11,5 +12,6 @@ pub struct NewTask<'a> {
 pub struct Task {
     pub id: i32,
     pub title: String,
+    pub created_at: chrono::NaiveDateTime,
     pub completed: bool,
 }

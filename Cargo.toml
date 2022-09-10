@@ -10,7 +10,8 @@ name = "todo_web"
 path = "bin/web_server.rs"
 
 [dependencies]
-diesel = { version = "1.0.0", features = ["sqlite"] }
+chrono = { version = "0.4.11", features = ["serde"] }
+diesel = { version = "1.0.0", features = ["sqlite", "chrono"] }
 rocket = "0.4.2"
 serde = { version = "1.0", features = ["derive"] }
 
