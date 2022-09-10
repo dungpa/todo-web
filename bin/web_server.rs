@@ -9,7 +9,6 @@ extern crate serde;
 use todo_web::rest::*;
 
 pub mod all_tasks;
-pub mod single_task;
 
 fn main() {
     rocket::ignite()
