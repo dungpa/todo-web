@@ -8,10 +8,11 @@ extern crate rocket_contrib;
 #[macro_use]
 extern crate serde;
 
+use rocket::http::Status;
 use rocket_contrib::json::Json;
 
 use todo_web::db::models::Task;
-use todo_web::db::{query_task, establish_connection};
+use todo_web::db::*;
 
 #[derive(Serialize)]
 struct JsonApiResponse {
@@ -30,8 +31,15 @@ fn tasks_get() -> Json<JsonApiResponse> {
     Json(response)
 }
 
+#[post("/tasks", data = "<title>")]
+fn tasks_post(title: String) -> Status {
+    let conn = establish_connection();
+    create_task(&conn, &title[..]); 
+    Status::Ok
+}
+
 fn main() {
     rocket::ignite()
-        .mount("/", routes![tasks_get])
+        .mount("/", routes![tasks_get, tasks_post])
         .launch();
 }
