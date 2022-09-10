@@ -5,13 +5,13 @@ use todo_web::db::models::Task;
 use todo_web::db::*;
 
 #[derive(Serialize)]
-pub struct JsonApiResponse {
+pub struct TaskListResponse {
     pub data: Vec<Task>,
 }
 
 #[get("/tasks")]
-pub fn get() -> Json<JsonApiResponse> {
-    let mut response = JsonApiResponse { data: vec![], };
+pub fn get() -> Json<TaskListResponse> {
+    let mut response = TaskListResponse { data: vec![], };
 
     let conn = establish_connection();
     for task in query_tasks(&conn) {
