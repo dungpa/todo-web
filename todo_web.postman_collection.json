@@ -12,7 +12,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "API"
+					"raw": "Backend"
 				},
 				"url": {
 					"raw": "http://localhost:8000/tasks",
@@ -89,6 +89,25 @@
 					"port": "8000",
 					"path": [
 						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get stats",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/stats",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"stats"
 					]
 				}
 			},
