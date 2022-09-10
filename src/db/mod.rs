@@ -31,9 +31,16 @@ pub fn filter_tasks(connection: &SqliteConnection, task_id: i32) -> Vec<models::
         .expect("Error filtering tasks")
 }
 
-pub fn update_task(connection: &SqliteConnection, task_id: i32, task_completed:bool) {
+pub fn update_task(connection: &SqliteConnection, task_id: i32, new_title: &str) {
     diesel::update(schema::task::table.filter(id.eq(task_id)))
-        .set(completed.eq(task_completed))
+        .set(title.eq(new_title))
+        .execute(connection)
+        .unwrap_or_else(|_| panic!("Error updating task {}", task_id));
+}
+
+pub fn complete_task(connection: &SqliteConnection, task_id: i32) {
+    diesel::update(schema::task::table.filter(id.eq(task_id)))
+        .set(completed.eq(true))
         .execute(connection)
         .unwrap_or_else(|_| panic!("Error updating task {}", task_id));
 }

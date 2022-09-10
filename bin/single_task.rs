@@ -15,12 +15,17 @@ pub fn show(id: i32) -> Result<Json<Task>, status::NotFound<String>> {
     Err(status::NotFound(format!("Error getting task {}.", id)))
 }
 
-#[post("/tasks/<id>")]
-pub fn complete(id: i32) -> Status {
-    // TODO: we should allow updating both completed status and title.
+#[post("/tasks/<id>", data = "<title>")]
+pub fn edit(id: i32, title: String) -> Status {
     let conn = establish_connection();
-    let completed = true;
-    update_task(&conn, id, completed); 
+    update_task(&conn, id, &title[..]); 
+    Status::Ok
+}
+
+#[put("/tasks/<id>")]
+pub fn complete(id: i32) -> Status {
+    let conn = establish_connection();
+    complete_task(&conn, id); 
     Status::Ok
 }
 
