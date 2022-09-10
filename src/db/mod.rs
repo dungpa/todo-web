@@ -10,7 +10,7 @@ pub fn establish_connection() -> SqliteConnection {
 }
 
 pub fn create_task(connection: &SqliteConnection, title: &str) {
-    let task = models::NewTask { title };
+    let task = models::NewTask { title, completed: false };
 
     diesel::insert_into(schema::task::table)
         .values(&task)
