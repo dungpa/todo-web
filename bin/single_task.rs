@@ -1,3 +1,4 @@
+use rocket::http::Status;
 use rocket_contrib::json::Json;
 
 use todo_web::db::models::Task;
@@ -15,3 +16,12 @@ pub fn get(id: i32) -> Json<Task> {
     // TODO: return a Result value instead.
     panic!("Task {} not found", id);
 }
+
+
+#[delete("/tasks/<id>")]
+pub fn delete(id: i32) -> Status {
+    let conn = establish_connection();
+    delete_task(&conn, id); 
+    Status::Ok
+}
+

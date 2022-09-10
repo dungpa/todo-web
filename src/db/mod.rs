@@ -1,4 +1,5 @@
 use diesel::{prelude::*, sqlite::SqliteConnection};
+use crate::db::schema::task::id;
 
 pub mod models;
 pub mod schema;
@@ -28,4 +29,10 @@ pub fn delete_tasks(connection: &SqliteConnection) {
     diesel::delete(schema::task::table)
         .execute(connection)
         .expect("Error deleting tasks");
+}
+
+pub fn delete_task(connection: &SqliteConnection, task_id: i32) {
+    diesel::delete(schema::task::table.filter(id.eq(task_id)))
+        .execute(connection)
+        .unwrap_or_else(|_| panic!("Error deleting task {}", task_id));
 }
