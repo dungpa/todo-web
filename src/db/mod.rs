@@ -18,8 +18,14 @@ pub fn create_task(connection: &SqliteConnection, title: &str) {
         .expect("Error inserting new task");
 }
 
-pub fn query_task(connection: &SqliteConnection) -> Vec<models::Task> {
+pub fn query_tasks(connection: &SqliteConnection) -> Vec<models::Task> {
     schema::task::table
         .load::<models::Task>(connection)
         .expect("Error loading tasks")
+}
+
+pub fn delete_tasks(connection: &SqliteConnection) {
+    diesel::delete(schema::task::table)
+        .execute(connection)
+        .expect("Error deleting tasks");
 }

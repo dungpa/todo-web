@@ -25,7 +25,7 @@ fn tasks_get() -> Json<JsonApiResponse> {
     let mut response = JsonApiResponse { data: vec![], };
 
     let conn = establish_connection();
-    for task in query_task(&conn) {
+    for task in query_tasks(&conn) {
         response.data.push(task);
     }
 
@@ -39,8 +39,15 @@ fn tasks_post(title: String) -> Status {
     Status::Ok
 }
 
+#[delete("/tasks")]
+fn tasks_delete() -> Status {
+    let conn = establish_connection();
+    delete_tasks(&conn); 
+    Status::Ok
+}
+
 fn main() {
     rocket::ignite()
-        .mount("/", routes![tasks_get, tasks_post])
+        .mount("/", routes![tasks_get, tasks_post, tasks_delete])
         .launch();
 }
