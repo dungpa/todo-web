@@ -1,5 +1,5 @@
 # todo-web
-TODO web app written in Rust
+TODO web app written in Rust using Rocket, Diesel and Seed.
 
 ---
 
