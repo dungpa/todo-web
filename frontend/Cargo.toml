@@ -13,3 +13,4 @@ todo-web = { path = ".." }
 seed = "=0.4.1"
 wasm-bindgen = "=0.2.50"
 web-sys = "^0.3.27"
+futures = "^0.1.28"

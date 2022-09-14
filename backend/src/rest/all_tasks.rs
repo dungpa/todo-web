@@ -1,21 +1,22 @@
 use rocket::http::Status;
 use rocket_contrib::json::Json;
 
-use crate::db::models::Task;
+use todo_web::TaskListResponse;
 use crate::db::*;
-
-#[derive(Serialize)]
-pub struct TaskListResponse {
-    pub data: Vec<Task>,
-}
 
 #[get("/tasks")]
 pub fn list() -> Json<TaskListResponse> {
     let mut response = TaskListResponse { data: vec![], };
 
     let conn = establish_connection();
-    for task in query_tasks(&conn) {
-        response.data.push(task);
+    for db_task in query_tasks(&conn) {
+        let api_task = todo_web::Task {
+            id: db_task.id,
+            title: db_task.title,
+            created_at: db_task.created_at,
+            completed: db_task.completed,
+        };
+        response.data.push(api_task);
     }
 
     Json(response)

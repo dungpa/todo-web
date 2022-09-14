@@ -8,10 +8,11 @@ pub struct NewTask<'a> {
     pub completed: bool,
 }
 
-#[derive(Queryable, Serialize)]
+#[derive(Clone, Debug, Queryable, Deserialize, Serialize)]
 pub struct Task {
     pub id: i32,
     pub title: String,
     pub created_at: chrono::NaiveDateTime,
     pub completed: bool,
 }
+
