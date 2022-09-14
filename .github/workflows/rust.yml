@@ -15,8 +15,11 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    - uses: davidB/rust-cargo-make@v1
+      with:
+        version: '0.23.0'
     - uses: actions/checkout@v3
     - name: Build
-      run: cargo build --verbose
+      run: cargo make
     - name: Run tests
       run: cargo test
