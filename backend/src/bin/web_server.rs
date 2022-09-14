@@ -3,7 +3,7 @@
 #[macro_use]
 extern crate rocket;
 
-use todo_web::rest::*;
+use backend::rest::*;
 
 fn main() {
     rocket::ignite()
