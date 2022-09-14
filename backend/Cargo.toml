@@ -10,6 +10,7 @@ todo-web = { path = ".." }
 chrono = { version = "0.4.11", features = ["serde"] }
 diesel = { version = "1.0.0", features = ["sqlite", "chrono"] }
 rocket = "0.4.2"
+rocket_cors = { version = "0.5.0", default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 
 [dependencies.rocket_contrib]
