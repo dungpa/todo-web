@@ -2,10 +2,10 @@
 extern crate seed;
 use seed::prelude::*;
 
-use seed::{fetch, Request};
 use futures::Future;
+use seed::{fetch, Request};
 
-use todo_web::{TaskListResponse, Task};
+use todo_web::{Task, TaskListResponse};
 
 struct Model {
     tasks: Vec<Task>,
@@ -29,15 +29,45 @@ fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
 }
 
 fn view(model: &Model) -> impl View<Msg> {
-    let tasks: Vec::<Node<Msg>> = model.tasks.iter().map(|t| {
-        li![{t.title.clone()}]
-    }).collect();
+    let tasks: Vec<Node<Msg>> = model
+        .tasks
+        .iter()
+        .map(|t| {
+            let todo_style = 
+                if t.completed {
+                    style! {
+                        St::Color => "red",
+                        St::FontSize => "19",
+                        St::Padding => "5",
+                        St::TextDecoration => "line-through",
+                    }
+                } else {
+                    style! {
+                        St::Color => "green",
+                        St::FontSize => "19",
+                        St::Padding => "5",
+                    }
+                };
+            div! [
+                todo_style,
+                p! [
+                    { t.title.clone() }
+                ]
+            ]
+        })
+        .collect();
 
-    h1![
-        {"Tasks"},
-        ul![
-            tasks,
+    div! [
+        style! {
+            St::Padding => "20",
+        },
+        h1! [
+            { "TODO list" },
+            style! {
+                St::FontSize => "24",
+            },
         ],
+        tasks
     ]
 }
 
@@ -47,9 +77,7 @@ fn fetch_drills() -> impl Future<Item = Msg, Error = Msg> {
 
 fn init(_url: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.perform_cmd(fetch_drills());
-    Model {
-        tasks: vec![],
-    }
+    Model { tasks: vec![] }
 }
 
 #[wasm_bindgen(start)]
