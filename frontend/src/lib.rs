@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate seed;
-use seed::prelude::*;
+
+use seed::{prelude::*, *};
 
 use futures::Future;
 use seed::{fetch, Request};
@@ -48,10 +49,31 @@ fn view(model: &Model) -> impl View<Msg> {
                         St::Padding => "5",
                     }
                 };
+            let cond_complete =
+                if t.completed {
+                    empty()
+                } else {
+                    button! [ 
+                        class![ "button", "is-info" ], 
+                        {"Complete"}, 
+                    ]
+                };
+            let divider = span! [ 
+                    style! [ 
+                        St::MarginLeft => "5",
+                        St::MarginRight => "5", 
+                    ] 
+                ];
             div! [
-                todo_style,
                 p! [
+                    todo_style,
                     { t.title.clone() }
+                ],
+                cond_complete,
+                divider,
+                button! [ 
+                    class![ "button", "is-danger" ], 
+                    {"Delete"}, 
                 ]
             ]
         })
@@ -64,7 +86,7 @@ fn view(model: &Model) -> impl View<Msg> {
         h1! [
             { "TODO list" },
             style! {
-                St::FontSize => "24",
+                St::FontSize => "44",
             },
         ],
         tasks
