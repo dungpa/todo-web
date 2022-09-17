@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate seed;
 
 use seed::{prelude::*, *};
@@ -38,15 +37,15 @@ fn view(model: &Model) -> impl View<Msg> {
                 if t.completed {
                     style! {
                         St::Color => "red",
-                        St::FontSize => "19",
-                        St::Padding => "5",
+                        St::FontSize => px(19),
+                        St::Padding => px(5),
                         St::TextDecoration => "line-through",
                     }
                 } else {
                     style! {
                         St::Color => "green",
-                        St::FontSize => "19",
-                        St::Padding => "5",
+                        St::FontSize => px(19),
+                        St::Padding => px(5),
                     }
                 };
             let cond_complete =
@@ -60,8 +59,8 @@ fn view(model: &Model) -> impl View<Msg> {
                 };
             let divider = span! [ 
                     style! [ 
-                        St::MarginLeft => "5",
-                        St::MarginRight => "5", 
+                        St::MarginLeft => px(5),
+                        St::MarginRight => px(5), 
                     ] 
                 ];
             div! [
@@ -81,12 +80,12 @@ fn view(model: &Model) -> impl View<Msg> {
 
     div! [
         style! {
-            St::Padding => "20",
+            St::Padding => px(20),
         },
         h1! [
             { "TODO list" },
             style! {
-                St::FontSize => "44",
+                St::FontSize => px(44),
             },
         ],
         tasks
