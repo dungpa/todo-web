@@ -103,7 +103,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     }
 }
 
-fn view(model: &Model) -> impl View<Msg> {
+fn view(model: &Model) -> Node<Msg> {
     let add_new_task =
         div! [
             C! [ "field", "has-addons"],
