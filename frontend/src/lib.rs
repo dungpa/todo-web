@@ -1,8 +1,9 @@
 extern crate seed;
 
-use seed::{prelude::*, *};
+use std::mem;
 
 use futures::Future;
+use seed::{prelude::*, *};
 use seed::{fetch, Request};
 
 use todo_web::{Task, TaskListResponse};
@@ -16,9 +17,11 @@ struct Model {
 enum Msg {
     FetchedTasks(fetch::ResponseDataResult<TaskListResponse>),
     NewTodoDescriptionChanged(String),
+    AddNewTodo,
+    NewTaskAdded(fetch::ResponseDataResult<String>),
 }
 
-fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
+fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::FetchedTasks(Ok(mut result)) => {
             model.tasks.clear();
@@ -29,6 +32,23 @@ fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
         },
         Msg::NewTodoDescriptionChanged(description) => {
             model.new_todo_description = description;
+        },
+        Msg::AddNewTodo => {
+            // TODO: id should not be exposed when it is unused.
+            let fake_id = 0;
+            model.tasks.push(Task {
+                id: fake_id,
+                title: mem::take(&mut model.new_todo_description),
+                created_at: chrono::Utc::now().naive_utc(),
+                completed: false,
+            });
+            orders.perform_cmd(Request::new("http://localhost:8000/tasks/")
+                .method(Method::Post)
+                .send_json(&mut model.new_todo_description)
+                .fetch_json_data(Msg::NewTaskAdded)
+            );
+        },
+        Msg::NewTaskAdded(_) => {
         }
     }
 }
@@ -56,7 +76,8 @@ fn view(model: &Model) -> impl View<Msg> {
                 class! ["control", "is-large"],
                 button! [ 
                     class![ "button", "is-primary", "is-large" ], 
-                    {"Add Todo"}, 
+                    { "Add Todo" }, 
+                    raw_ev(Ev::Click, |_| Msg::AddNewTodo),
                 ],
             ]
         ];
@@ -90,7 +111,7 @@ fn view(model: &Model) -> impl View<Msg> {
                 } else {
                     button! [ 
                         class![ "button", "is-info" ], 
-                        {"Complete"}, 
+                        { "Complete" }, 
                     ]
                 };
             let divider = span! [ 
@@ -102,7 +123,7 @@ fn view(model: &Model) -> impl View<Msg> {
             let delete =
                 button! [ 
                     class![ "button", "is-danger" ], 
-                    {"Delete"}, 
+                    { "Delete" }, 
                 ];
             div! [
                 title,
