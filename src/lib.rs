@@ -13,3 +13,8 @@ pub struct Task {
 pub struct TaskListResponse {
     pub data: Vec<Task>,
 }
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct TaskRequest {
+    pub title: String,
+}

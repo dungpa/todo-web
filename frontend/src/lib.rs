@@ -6,7 +6,7 @@ use futures::Future;
 use seed::{prelude::*, *};
 use seed::{fetch, Request};
 
-use todo_web::{Task, TaskListResponse};
+use todo_web::{Task, TaskRequest, TaskListResponse};
 
 struct Model {
     tasks: Vec<Task>,
@@ -42,9 +42,10 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 created_at: chrono::Utc::now().naive_utc(),
                 completed: false,
             });
+            let task_request = TaskRequest { title: model.new_task_description };
             orders.perform_cmd(Request::new("http://localhost:8000/tasks/")
                 .method(Method::Post)
-                .send_json(&mut model.new_task_description)
+                .send_json(&task_request)
                 .fetch_json_data(Msg::NewTaskAdded)
             );
         },

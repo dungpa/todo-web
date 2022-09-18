@@ -1,7 +1,7 @@
 use rocket::http::Status;
 use rocket_contrib::json::Json;
 
-use todo_web::TaskListResponse;
+use todo_web::{TaskRequest, TaskListResponse};
 use crate::db::*;
 
 fn create_api_task (db_task: models::Task) -> todo_web::Task {
@@ -25,10 +25,11 @@ pub fn list() -> Json<TaskListResponse> {
     Json(response)
 }
 
-#[post("/tasks", data = "<title>")]
-pub fn add(title: String) -> Json<TaskListResponse> {
+#[post("/tasks", data = "<task>")]
+pub fn add(task: Json<TaskRequest>) -> Json<TaskListResponse> {
     let mut response = TaskListResponse { data: vec![], };
 
+    let title = task.into_inner().title;
     let conn = establish_connection();
     for db_task in create_task(&conn, &title[..]) {
         response.data.push(create_api_task(db_task));
