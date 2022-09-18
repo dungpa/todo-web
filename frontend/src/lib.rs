@@ -15,42 +15,38 @@ struct Model {
 
 #[derive(Clone, Debug)]
 enum Msg {
-    FetchedTasks(fetch::ResponseDataResult<TaskListResponse>),
+    TasksFetched(fetch::ResponseDataResult<TaskListResponse>),
     NewTaskDescriptionChanged(String),
     AddNewTask,
-    NewTaskAdded(fetch::ResponseDataResult<String>),
+    NewTaskAdded(fetch::ResponseDataResult<TaskListResponse>),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::FetchedTasks(Ok(mut result)) => {
+        Msg::TasksFetched(Ok(mut result)) => {
             model.tasks.clear();
             model.tasks.append(&mut result.data);
         }
-        Msg::FetchedTasks(Err(reason)) => {
+        Msg::TasksFetched(Err(reason)) => {
             log!(format!("Error fetching: {:?}", reason));
         },
         Msg::NewTaskDescriptionChanged(description) => {
             model.new_task_description = description;
         },
         Msg::AddNewTask => {
-            // TODO: id should not be exposed when it is unused.
-            let fake_id = 0;
-            model.tasks.push(Task {
-                id: fake_id,
-                title: mem::take(&mut model.new_task_description),
-                created_at: chrono::Utc::now().naive_utc(),
-                completed: false,
-            });
-            let task_request = TaskRequest { title: model.new_task_description };
+            let task_request = TaskRequest { title: mem::take(&mut model.new_task_description) };
             orders.perform_cmd(Request::new("http://localhost:8000/tasks/")
                 .method(Method::Post)
                 .send_json(&task_request)
                 .fetch_json_data(Msg::NewTaskAdded)
             );
         },
-        Msg::NewTaskAdded(_) => {
-        }
+        Msg::NewTaskAdded(Ok(mut result)) => {
+            model.tasks.append(&mut result.data);
+        },
+        Msg::NewTaskAdded(Err(reason)) => {
+            log!(format!("Error adding a new task: {:?}", reason));
+        },
     }
 }
 
@@ -151,7 +147,7 @@ fn view(model: &Model) -> impl View<Msg> {
 }
 
 fn fetch_drills() -> impl Future<Item = Msg, Error = Msg> {
-    Request::new("http://localhost:8000/tasks/").fetch_json_data(Msg::FetchedTasks)
+    Request::new("http://localhost:8000/tasks/").fetch_json_data(Msg::TasksFetched)
 }
 
 fn init(_url: Url, orders: &mut impl Orders<Msg>) -> Model {

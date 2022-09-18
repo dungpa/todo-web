@@ -25,7 +25,7 @@ pub fn list() -> Json<TaskListResponse> {
     Json(response)
 }
 
-#[post("/tasks", data = "<task>")]
+#[post("/tasks", format = "json", data = "<task>")]
 pub fn add(task: Json<TaskRequest>) -> Json<TaskListResponse> {
     let mut response = TaskListResponse { data: vec![], };
 
