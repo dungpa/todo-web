@@ -64,17 +64,14 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             );
         },
         Msg::TaskCompleted(Ok(result)) => {
-            match model.tasks.get(&result.id) {
-                Some(value) => { 
-                    let new_value = Task {
-                        id: value.id,
-                        title: value.title.clone(),
-                        created_at: value.created_at,
-                        completed: true,
-                    };
-                    model.tasks.insert(result.id, new_value);
-                },
-                None => ()
+            if let Some(value) = model.tasks.get(&result.id) {
+                let new_value = Task {
+                    id: value.id,
+                    title: value.title.clone(),
+                    created_at: value.created_at,
+                    completed: true,
+                };
+                model.tasks.insert(result.id, new_value);
             };
         },
         Msg::TaskCompleted(Err(reason)) => {
