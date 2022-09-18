@@ -10,13 +10,22 @@ pub fn establish_connection() -> SqliteConnection {
         .unwrap_or_else(|_| panic!("Error connecting to {}", db))
 }
 
-pub fn create_task(connection: &SqliteConnection, description: &str) {
+pub fn create_task(connection: &SqliteConnection, description: &str) -> Vec<models::Task> {
     let task = models::NewTask { title: description, created_at: chrono::Utc::now().naive_utc(), completed: false };
 
-    diesel::insert_into(schema::task::table)
+    let inserted_count = diesel::insert_into(schema::task::table)
         .values(&task)
         .execute(connection)
         .expect("Error inserting new task");
+
+    schema::task::table
+        .order(id.desc())
+        .limit(inserted_count as i64)
+        .load(connection)
+        .expect("Error loading tasks")
+        .into_iter()
+        .rev()
+        .collect::<Vec<_>>()
 }
 
 pub fn query_tasks(connection: &SqliteConnection) -> Vec<models::Task> {

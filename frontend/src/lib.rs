@@ -34,7 +34,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.new_task_description = description;
         },
         Msg::AddNewTask => {
-            // task: id should not be exposed when it is unused.
+            // TODO: id should not be exposed when it is unused.
             let fake_id = 0;
             model.tasks.push(Task {
                 id: fake_id,
@@ -76,7 +76,7 @@ fn view(model: &Model) -> impl View<Msg> {
                 class! ["control", "is-large"],
                 button! [ 
                     class![ "button", "is-primary", "is-large" ], 
-                    { "Add task" }, 
+                    { "Add Todo" }, 
                     raw_ev(Ev::Click, |_| Msg::AddNewTask),
                 ],
             ]
@@ -139,7 +139,7 @@ fn view(model: &Model) -> impl View<Msg> {
             St::Padding => px(20),
         },
         h1! [
-            { "task list" },
+            { "Todo list" },
             style! {
                 St::FontSize => px(44),
             },
