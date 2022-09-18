@@ -10,14 +10,14 @@ use todo_web::{Task, TaskListResponse};
 
 struct Model {
     tasks: Vec<Task>,
-    new_todo_description: String,
+    new_task_description: String,
 }
 
 #[derive(Clone, Debug)]
 enum Msg {
     FetchedTasks(fetch::ResponseDataResult<TaskListResponse>),
-    NewTodoDescriptionChanged(String),
-    AddNewTodo,
+    NewTaskDescriptionChanged(String),
+    AddNewTask,
     NewTaskAdded(fetch::ResponseDataResult<String>),
 }
 
@@ -30,21 +30,21 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::FetchedTasks(Err(reason)) => {
             log!(format!("Error fetching: {:?}", reason));
         },
-        Msg::NewTodoDescriptionChanged(description) => {
-            model.new_todo_description = description;
+        Msg::NewTaskDescriptionChanged(description) => {
+            model.new_task_description = description;
         },
-        Msg::AddNewTodo => {
-            // TODO: id should not be exposed when it is unused.
+        Msg::AddNewTask => {
+            // task: id should not be exposed when it is unused.
             let fake_id = 0;
             model.tasks.push(Task {
                 id: fake_id,
-                title: mem::take(&mut model.new_todo_description),
+                title: mem::take(&mut model.new_task_description),
                 created_at: chrono::Utc::now().naive_utc(),
                 completed: false,
             });
             orders.perform_cmd(Request::new("http://localhost:8000/tasks/")
                 .method(Method::Post)
-                .send_json(&mut model.new_todo_description)
+                .send_json(&mut model.new_task_description)
                 .fetch_json_data(Msg::NewTaskAdded)
             );
         },
@@ -54,7 +54,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 }
 
 fn view(model: &Model) -> impl View<Msg> {
-    let add_todo =
+    let add_new_task =
         div! [
             class! [ "field", "has-addons"],
             style! [
@@ -66,26 +66,26 @@ fn view(model: &Model) -> impl View<Msg> {
                 input! [
                     class! ["input", "is-large"],
                     attrs! {
-                        At::Placeholder => "Todo description",
-                        At::Value => model.new_todo_description;
+                        At::Placeholder => "task description",
+                        At::Value => model.new_task_description;
                     },
-                    input_ev(Ev::Input, Msg::NewTodoDescriptionChanged),
+                    input_ev(Ev::Input, Msg::NewTaskDescriptionChanged),
                 ],
             ],
             div! [
                 class! ["control", "is-large"],
                 button! [ 
                     class![ "button", "is-primary", "is-large" ], 
-                    { "Add Todo" }, 
-                    raw_ev(Ev::Click, |_| Msg::AddNewTodo),
+                    { "Add task" }, 
+                    raw_ev(Ev::Click, |_| Msg::AddNewTask),
                 ],
             ]
         ];
-    let tasks: Vec<Node<Msg>> = model
+    let current_tasks: Vec<Node<Msg>> = model
         .tasks
         .iter()
         .map(|t| {
-            let todo_style = 
+            let task_style = 
                 if t.completed {
                     style! {
                         St::Color => "red",
@@ -102,7 +102,7 @@ fn view(model: &Model) -> impl View<Msg> {
                 };
             let title =
                 p! [
-                    todo_style,
+                    task_style,
                     { t.title.clone() },
                 ];
             let cond_complete =
@@ -139,13 +139,13 @@ fn view(model: &Model) -> impl View<Msg> {
             St::Padding => px(20),
         },
         h1! [
-            { "Todo list" },
+            { "task list" },
             style! {
                 St::FontSize => px(44),
             },
         ],
-        add_todo,
-        tasks,
+        add_new_task,
+        current_tasks,
     ]
 }
 
@@ -155,7 +155,7 @@ fn fetch_drills() -> impl Future<Item = Msg, Error = Msg> {
 
 fn init(_url: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.perform_cmd(fetch_drills());
-    Model { tasks: vec![], new_todo_description: "".to_owned() }
+    Model { tasks: vec![], new_task_description: "".to_owned() }
 }
 
 #[wasm_bindgen(start)]
