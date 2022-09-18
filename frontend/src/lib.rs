@@ -6,7 +6,7 @@ use futures::Future;
 use seed::{prelude::*, *};
 use seed::{fetch, Request};
 
-use todo_web::{Task, TaskRequest, TaskListResponse};
+use todo_web::{Task, TaskRequest, TaskResponse, TaskListResponse};
 
 struct Model {
     tasks: Vec<Task>,
@@ -19,6 +19,8 @@ enum Msg {
     NewTaskDescriptionChanged(String),
     AddNewTask,
     NewTaskAdded(fetch::ResponseDataResult<TaskListResponse>),
+    DeleteTask(i32),
+    TaskDeleted(fetch::ResponseDataResult<TaskResponse>),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -45,6 +47,26 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.tasks.append(&mut result.data);
         },
         Msg::NewTaskAdded(Err(reason)) => {
+            log!(format!("Error adding a new task: {:?}", reason));
+        },
+        Msg::DeleteTask(task_id) => {
+            orders.perform_cmd(Request::new(format!("http://localhost:8000/tasks/{}/", task_id))
+                .method(Method::Delete)
+                .fetch_json_data(Msg::TaskDeleted)
+            );
+        },
+        Msg::TaskDeleted(Ok(result)) => {
+            let mut indices = vec![];
+            for (pos, task) in model.tasks.iter().enumerate() {
+                if task.id == result.id {
+                    indices.push(pos);
+                }
+            }
+            for pos in indices {
+                model.tasks.remove(pos);
+            }
+        },
+        Msg::TaskDeleted(Err(reason)) => {
             log!(format!("Error adding a new task: {:?}", reason));
         },
     }
@@ -117,10 +139,12 @@ fn view(model: &Model) -> impl View<Msg> {
                         St::MarginRight => px(5), 
                     ] 
                 ];
+            let id = t.id;
             let delete =
                 button! [ 
                     class![ "button", "is-danger" ], 
                     { "Delete" }, 
+                    raw_ev(Ev::Click, move |_| Msg::DeleteTask(id)),
                 ];
             div! [
                 title,

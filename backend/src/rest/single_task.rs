@@ -2,7 +2,7 @@ use rocket::http::Status;
 use rocket::response::status;
 use rocket_contrib::json::Json;
 
-use todo_web::Task;
+use todo_web::{Task, TaskResponse};
 
 use crate::db::*;
 
@@ -30,16 +30,16 @@ pub fn edit(id: i32, title: String) -> Status {
 }
 
 #[put("/tasks/<id>")]
-pub fn complete(id: i32) -> Status {
+pub fn complete(id: i32) -> Json<TaskResponse> {
     let conn = establish_connection();
     complete_task(&conn, id); 
-    Status::Ok
+    Json(TaskResponse { id })
 }
 
 #[delete("/tasks/<id>")]
-pub fn remove(id: i32) -> Status {
+pub fn remove(id: i32) -> Json<TaskResponse> {
     let conn = establish_connection();
     delete_task(&conn, id); 
-    Status::Ok
+    Json(TaskResponse { id })
 }
 

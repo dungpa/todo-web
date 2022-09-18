@@ -18,3 +18,8 @@ pub struct TaskListResponse {
 pub struct TaskRequest {
     pub title: String,
 }
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct TaskResponse {
+    pub id: i32,
+}
