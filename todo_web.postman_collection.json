@@ -12,7 +12,12 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "Backend"
+					"raw": "{ \"title\": \"Backend\" }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
 				},
 				"url": {
 					"raw": "http://localhost:8000/tasks",
