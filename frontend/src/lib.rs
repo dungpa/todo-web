@@ -1,6 +1,7 @@
 extern crate seed;
 
 use std::mem;
+use indexmap::IndexMap;
 
 use futures::Future;
 use seed::{prelude::*, *};
@@ -9,7 +10,7 @@ use seed::{fetch, Request};
 use todo_web::{Task, TaskRequest, TaskResponse, TaskListResponse};
 
 struct Model {
-    tasks: Vec<Task>,
+    tasks: IndexMap<i32, Task>,
     new_task_description: String,
 }
 
@@ -19,15 +20,19 @@ enum Msg {
     NewTaskDescriptionChanged(String),
     AddNewTask,
     NewTaskAdded(fetch::ResponseDataResult<TaskListResponse>),
+    CompleteTask(i32),
+    TaskCompleted(fetch::ResponseDataResult<TaskResponse>),
     DeleteTask(i32),
     TaskDeleted(fetch::ResponseDataResult<TaskResponse>),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::TasksFetched(Ok(mut result)) => {
+        Msg::TasksFetched(Ok(result)) => {
             model.tasks.clear();
-            model.tasks.append(&mut result.data);
+            for task in result.data {
+                model.tasks.insert(task.id, task);
+            }
         }
         Msg::TasksFetched(Err(reason)) => {
             log!(format!("Error fetching: {:?}", reason));
@@ -43,11 +48,36 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 .fetch_json_data(Msg::NewTaskAdded)
             );
         },
-        Msg::NewTaskAdded(Ok(mut result)) => {
-            model.tasks.append(&mut result.data);
+        Msg::NewTaskAdded(Ok(result)) => {
+            for task in result.data {
+                model.tasks.insert(task.id, task);
+            }
         },
         Msg::NewTaskAdded(Err(reason)) => {
             log!(format!("Error adding a new task: {:?}", reason));
+        },
+        Msg::CompleteTask(task_id) => {
+            orders.perform_cmd(Request::new(format!("http://localhost:8000/tasks/{}/", task_id))
+                .method(Method::Put)
+                .fetch_json_data(Msg::TaskCompleted)
+            );
+        },
+        Msg::TaskCompleted(Ok(result)) => {
+            match model.tasks.get(&result.id) {
+                Some(value) => { 
+                    let new_value = Task {
+                        id: value.id,
+                        title: value.title.clone(),
+                        created_at: value.created_at,
+                        completed: true,
+                    };
+                    model.tasks.insert(result.id, new_value);
+                },
+                None => ()
+            };
+        },
+        Msg::TaskCompleted(Err(reason)) => {
+            log!(format!("Error completing a task: {:?}", reason));
         },
         Msg::DeleteTask(task_id) => {
             orders.perform_cmd(Request::new(format!("http://localhost:8000/tasks/{}/", task_id))
@@ -56,18 +86,10 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             );
         },
         Msg::TaskDeleted(Ok(result)) => {
-            let mut indices = vec![];
-            for (pos, task) in model.tasks.iter().enumerate() {
-                if task.id == result.id {
-                    indices.push(pos);
-                }
-            }
-            for pos in indices {
-                model.tasks.remove(pos);
-            }
+            model.tasks.remove(&result.id);
         },
         Msg::TaskDeleted(Err(reason)) => {
-            log!(format!("Error adding a new task: {:?}", reason));
+            log!(format!("Error deleting a task: {:?}", reason));
         },
     }
 }
@@ -103,7 +125,7 @@ fn view(model: &Model) -> impl View<Msg> {
     let current_tasks: Vec<Node<Msg>> = model
         .tasks
         .iter()
-        .map(|t| {
+        .map(|(_, t)| {
             let task_style = 
                 if t.completed {
                     style! {
@@ -124,13 +146,15 @@ fn view(model: &Model) -> impl View<Msg> {
                     task_style,
                     { t.title.clone() },
                 ];
+            let id = t.id;
             let cond_complete =
                 if t.completed {
                     empty()
                 } else {
                     button! [ 
                         class![ "button", "is-info" ], 
-                        { "Complete" }, 
+                        { "Complete" },
+                        raw_ev(Ev::Click, move |_| Msg::CompleteTask(id)), 
                     ]
                 };
             let divider = span! [ 
@@ -139,7 +163,6 @@ fn view(model: &Model) -> impl View<Msg> {
                         St::MarginRight => px(5), 
                     ] 
                 ];
-            let id = t.id;
             let delete =
                 button! [ 
                     class![ "button", "is-danger" ], 
@@ -176,7 +199,7 @@ fn fetch_drills() -> impl Future<Item = Msg, Error = Msg> {
 
 fn init(_url: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.perform_cmd(fetch_drills());
-    Model { tasks: vec![], new_task_description: "".to_owned() }
+    Model { tasks: IndexMap::new(), new_task_description: "".to_owned() }
 }
 
 #[wasm_bindgen(start)]
