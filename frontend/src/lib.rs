@@ -4,9 +4,7 @@ use std::mem;
 use indexmap::IndexMap;
 use itertools::Itertools;
 
-use futures::Future;
 use seed::{prelude::*, *};
-use seed::{fetch, Request};
 
 use todo_web::{Task, TaskRequest, TaskResponse, TaskListResponse};
 
@@ -15,16 +13,16 @@ struct Model {
     new_task_description: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 enum Msg {
-    TasksFetched(fetch::ResponseDataResult<TaskListResponse>),
+    TasksFetched(fetch::Result<TaskListResponse>),
     NewTaskDescriptionChanged(String),
     AddNewTask,
-    NewTaskAdded(fetch::ResponseDataResult<TaskListResponse>),
+    NewTaskAdded(fetch::Result<TaskListResponse>),
     CompleteTask(i32),
-    TaskCompleted(fetch::ResponseDataResult<TaskResponse>),
+    TaskCompleted(fetch::Result<TaskResponse>),
     DeleteTask(i32),
-    TaskDeleted(fetch::ResponseDataResult<TaskResponse>),
+    TaskDeleted(fetch::Result<TaskResponse>),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -43,11 +41,16 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         },
         Msg::AddNewTask => {
             let task_request = TaskRequest { title: mem::take(&mut model.new_task_description) };
-            orders.perform_cmd(Request::new("http://localhost:8000/tasks/")
-                .method(Method::Post)
-                .send_json(&task_request)
-                .fetch_json_data(Msg::NewTaskAdded)
-            );
+            let request =
+                Request::new("http://localhost:8000/tasks/")
+                    .method(Method::Post)
+                    .json(&task_request)
+                    .expect("Unable to construct request");
+            orders.perform_cmd(async {
+                Msg::NewTaskAdded(async {
+                    fetch(request).await?.check_status()?.json().await
+                }.await)
+            });
         },
         Msg::NewTaskAdded(Ok(result)) => {
             for task in result.data {
@@ -58,10 +61,14 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             log!(format!("Error adding a new task: {:?}", reason));
         },
         Msg::CompleteTask(task_id) => {
-            orders.perform_cmd(Request::new(format!("http://localhost:8000/tasks/{}/", task_id))
-                .method(Method::Put)
-                .fetch_json_data(Msg::TaskCompleted)
-            );
+            let request =
+                Request::new(format!("http://localhost:8000/tasks/{}/", task_id))
+                    .method(Method::Put);
+            orders.perform_cmd(async {
+                Msg::TaskCompleted(async {
+                    fetch(request).await?.check_status()?.json().await
+                }.await)
+            });
         },
         Msg::TaskCompleted(Ok(result)) => {
             if let Some(value) = model.tasks.get(&result.id) {
@@ -78,10 +85,14 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             log!(format!("Error completing a task: {:?}", reason));
         },
         Msg::DeleteTask(task_id) => {
-            orders.perform_cmd(Request::new(format!("http://localhost:8000/tasks/{}/", task_id))
-                .method(Method::Delete)
-                .fetch_json_data(Msg::TaskDeleted)
-            );
+            let request =
+                Request::new(format!("http://localhost:8000/tasks/{}/", task_id))
+                    .method(Method::Delete);
+            orders.perform_cmd(async {
+                Msg::TaskDeleted(async {
+                    fetch(request).await?.check_status()?.json().await
+                }.await)
+            });
         },
         Msg::TaskDeleted(Ok(result)) => {
             model.tasks.remove(&result.id);
@@ -192,16 +203,21 @@ fn view(model: &Model) -> impl View<Msg> {
     ]
 }
 
-fn fetch_drills() -> impl Future<Item = Msg, Error = Msg> {
-    Request::new("http://localhost:8000/tasks/").fetch_json_data(Msg::TasksFetched)
+fn fetch_tasks(orders: &mut impl Orders<Msg>) {
+    let request = Request::new("http://localhost:8000/tasks/");
+    orders.perform_cmd(async {
+        Msg::TasksFetched(async {
+            fetch(request).await?.check_status()?.json().await
+        }.await)
+    });
 }
 
 fn init(_url: Url, orders: &mut impl Orders<Msg>) -> Model {
-    orders.perform_cmd(fetch_drills());
+    fetch_tasks(orders);
     Model { tasks: IndexMap::new(), new_task_description: "".to_owned() }
 }
 
 #[wasm_bindgen(start)]
 pub fn render() {
-    seed::App::build(init, update, view).finish().run();
+    seed::App::start("app", init, update, view);
 }
