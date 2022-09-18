@@ -2,6 +2,7 @@ extern crate seed;
 
 use std::mem;
 use indexmap::IndexMap;
+use itertools::Itertools;
 
 use futures::Future;
 use seed::{prelude::*, *};
@@ -107,7 +108,7 @@ fn view(model: &Model) -> impl View<Msg> {
                 input! [
                     class! ["input", "is-large"],
                     attrs! {
-                        At::Placeholder => "task description",
+                        At::Placeholder => "Todo description",
                         At::Value => model.new_task_description;
                     },
                     input_ev(Ev::Input, Msg::NewTaskDescriptionChanged),
@@ -125,6 +126,7 @@ fn view(model: &Model) -> impl View<Msg> {
     let current_tasks: Vec<Node<Msg>> = model
         .tasks
         .iter()
+        .sorted_by(|(k1, _), (k2, _)| k1.cmp(k2))
         .map(|(_, t)| {
             let task_style = 
                 if t.completed {
