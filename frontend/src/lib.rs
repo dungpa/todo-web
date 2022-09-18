@@ -9,11 +9,13 @@ use todo_web::{Task, TaskListResponse};
 
 struct Model {
     tasks: Vec<Task>,
+    new_todo_description: String,
 }
 
 #[derive(Clone, Debug)]
 enum Msg {
     FetchedTasks(fetch::ResponseDataResult<TaskListResponse>),
+    NewTodoDescriptionChanged(String),
 }
 
 fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
@@ -24,6 +26,9 @@ fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
         }
         Msg::FetchedTasks(Err(reason)) => {
             log!(format!("Error fetching: {:?}", reason));
+        },
+        Msg::NewTodoDescriptionChanged(description) => {
+            model.new_todo_description = description;
         }
     }
 }
@@ -42,7 +47,9 @@ fn view(model: &Model) -> impl View<Msg> {
                     class! ["input", "is-large"],
                     attrs! {
                         At::Placeholder => "Todo description",
-                    }
+                        At::Value => model.new_todo_description;
+                    },
+                    input_ev(Ev::Input, Msg::NewTodoDescriptionChanged),
                 ],
             ],
             div! [
@@ -127,7 +134,7 @@ fn fetch_drills() -> impl Future<Item = Msg, Error = Msg> {
 
 fn init(_url: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.perform_cmd(fetch_drills());
-    Model { tasks: vec![] }
+    Model { tasks: vec![], new_todo_description: "".to_owned() }
 }
 
 #[wasm_bindgen(start)]
