@@ -106,15 +106,15 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 fn view(model: &Model) -> impl View<Msg> {
     let add_new_task =
         div! [
-            class! [ "field", "has-addons"],
+            C! [ "field", "has-addons"],
             style! [
                 St::Padding => px(5),
                 St::Width => px(400),
             ],
             div! [
-                class! ["control", "is-large"],
+                C! ["control", "is-large"],
                 input! [
-                    class! ["input", "is-large"],
+                    C! ["input", "is-large"],
                     attrs! {
                         At::Placeholder => "Todo description",
                         At::Value => model.new_task_description;
@@ -123,11 +123,11 @@ fn view(model: &Model) -> impl View<Msg> {
                 ],
             ],
             div! [
-                class! ["control", "is-large"],
+                C! ["control", "is-large"],
                 button! [ 
-                    class![ "button", "is-primary", "is-large" ], 
+                    C![ "button", "is-primary", "is-large" ], 
                     { "Add Todo" }, 
-                    raw_ev(Ev::Click, |_| Msg::AddNewTask),
+                    ev(Ev::Click, |_| Msg::AddNewTask),
                 ],
             ]
         ];
@@ -162,9 +162,9 @@ fn view(model: &Model) -> impl View<Msg> {
                     empty()
                 } else {
                     button! [ 
-                        class![ "button", "is-info" ], 
+                        C![ "button", "is-info" ], 
                         { "Complete" },
-                        raw_ev(Ev::Click, move |_| Msg::CompleteTask(id)), 
+                        ev(Ev::Click, move |_| Msg::CompleteTask(id)), 
                     ]
                 };
             let divider = span! [ 
@@ -175,9 +175,9 @@ fn view(model: &Model) -> impl View<Msg> {
                 ];
             let delete =
                 button! [ 
-                    class![ "button", "is-danger" ], 
+                    C![ "button", "is-danger" ], 
                     { "Delete" }, 
-                    raw_ev(Ev::Click, move |_| Msg::DeleteTask(id)),
+                    ev(Ev::Click, move |_| Msg::DeleteTask(id)),
                 ];
             div! [
                 title,
