@@ -29,6 +29,30 @@ fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
 }
 
 fn view(model: &Model) -> impl View<Msg> {
+    let add_todo =
+        div! [
+            class! [ "field", "has-addons"],
+            style! [
+                St::Padding => px(5),
+                St::Width => px(400),
+            ],
+            div! [
+                class! ["control", "is-large"],
+                input! [
+                    class! ["input", "is-large"],
+                    attrs! {
+                        At::Placeholder => "Todo description",
+                    }
+                ],
+            ],
+            div! [
+                class! ["control", "is-large"],
+                button! [ 
+                    class![ "button", "is-primary", "is-large" ], 
+                    {"Add Todo"}, 
+                ],
+            ]
+        ];
     let tasks: Vec<Node<Msg>> = model
         .tasks
         .iter()
@@ -48,6 +72,11 @@ fn view(model: &Model) -> impl View<Msg> {
                         St::Padding => px(5),
                     }
                 };
+            let title =
+                p! [
+                    todo_style,
+                    { t.title.clone() },
+                ];
             let cond_complete =
                 if t.completed {
                     empty()
@@ -63,17 +92,16 @@ fn view(model: &Model) -> impl View<Msg> {
                         St::MarginRight => px(5), 
                     ] 
                 ];
-            div! [
-                p! [
-                    todo_style,
-                    { t.title.clone() }
-                ],
-                cond_complete,
-                divider,
+            let delete =
                 button! [ 
                     class![ "button", "is-danger" ], 
                     {"Delete"}, 
-                ]
+                ];
+            div! [
+                title,
+                cond_complete,
+                divider,
+                delete,
             ]
         })
         .collect();
@@ -83,12 +111,13 @@ fn view(model: &Model) -> impl View<Msg> {
             St::Padding => px(20),
         },
         h1! [
-            { "TODO list" },
+            { "Todo list" },
             style! {
                 St::FontSize => px(44),
             },
         ],
-        tasks
+        add_todo,
+        tasks,
     ]
 }
 
