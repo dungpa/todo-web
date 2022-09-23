@@ -25,6 +25,18 @@ enum Msg {
     TaskDeleted(fetch::Result<TaskResponse>),
 }
 
+async fn fetch_tasks_request<'a> (func: &impl Fn(fetch::Result<TaskListResponse>) -> Msg, request: Request<'a>) -> Msg {
+    func(async {
+        fetch(request).await?.check_status()?.json().await
+    }.await)
+}
+
+async fn fetch_task_request<'a> (func: &impl Fn(fetch::Result<TaskResponse>) -> Msg, request: Request<'a>) -> Msg {
+    func(async {
+        fetch(request).await?.check_status()?.json().await
+    }.await)
+}
+
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::TasksFetched(Ok(result)) => {
@@ -47,9 +59,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     .json(&task_request)
                     .expect("Unable to construct request");
             orders.perform_cmd(async {
-                Msg::NewTaskAdded(async {
-                    fetch(request).await?.check_status()?.json().await
-                }.await)
+                fetch_tasks_request(&Msg::NewTaskAdded, request).await
             });
         },
         Msg::NewTaskAdded(Ok(result)) => {
@@ -65,9 +75,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 Request::new(format!("http://localhost:8000/tasks/{}/", task_id))
                     .method(Method::Put);
             orders.perform_cmd(async {
-                Msg::TaskCompleted(async {
-                    fetch(request).await?.check_status()?.json().await
-                }.await)
+                fetch_task_request(&Msg::TaskCompleted, request).await
             });
         },
         Msg::TaskCompleted(Ok(result)) => {
@@ -89,9 +97,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 Request::new(format!("http://localhost:8000/tasks/{}/", task_id))
                     .method(Method::Delete);
             orders.perform_cmd(async {
-                Msg::TaskDeleted(async {
-                    fetch(request).await?.check_status()?.json().await
-                }.await)
+                fetch_task_request(&Msg::TaskDeleted, request).await
             });
         },
         Msg::TaskDeleted(Ok(result)) => {
@@ -206,9 +212,7 @@ fn view(model: &Model) -> Node<Msg> {
 fn fetch_tasks(orders: &mut impl Orders<Msg>) {
     let request = Request::new("http://localhost:8000/tasks/");
     orders.perform_cmd(async {
-        Msg::TasksFetched(async {
-            fetch(request).await?.check_status()?.json().await
-        }.await)
+        fetch_tasks_request(&Msg::TasksFetched, request).await
     });
 }
 
