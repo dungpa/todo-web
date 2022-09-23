@@ -1,5 +1,7 @@
 extern crate seed;
 
+pub mod types;
+
 use std::mem;
 use indexmap::IndexMap;
 use itertools::Itertools;
@@ -7,23 +9,7 @@ use itertools::Itertools;
 use seed::{prelude::*, *};
 
 use todo_web::{Task, TaskRequest, TaskResponse, TaskListResponse};
-
-struct Model {
-    tasks: IndexMap<i32, Task>,
-    new_task_description: String,
-}
-
-#[derive(Debug)]
-enum Msg {
-    TasksFetched(fetch::Result<TaskListResponse>),
-    NewTaskDescriptionChanged(String),
-    AddNewTask,
-    NewTaskAdded(fetch::Result<TaskListResponse>),
-    CompleteTask(i32),
-    TaskCompleted(fetch::Result<TaskResponse>),
-    DeleteTask(i32),
-    TaskDeleted(fetch::Result<TaskResponse>),
-}
+use crate::types::*;
 
 async fn fetch_tasks_request<'a> (func: &impl Fn(fetch::Result<TaskListResponse>) -> Msg, request: Request<'a>) -> Msg {
     func(async {

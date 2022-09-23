@@ -1,4 +1,3 @@
-- Deconstruct frontend into multiple modules.
 - Remove excessive clone calls.
 - Support edit functionality.
 - Change i32 to Ulid for ID column.
